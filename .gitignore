@@ -45,3 +45,4 @@ Temporary Items
 # VS bin and obj
 bin/
 obj/
+*.suo
