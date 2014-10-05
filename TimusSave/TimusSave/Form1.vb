@@ -49,7 +49,7 @@ Public Class Form1
         state = 1
         Label4.Text = "Status: Verifying credentials..."
         WebBrowser1.Navigate("http://acm.timus.ru/authedit.aspx")
-        Button2.Enabled = False
+        Panel1.Enabled = False
         ProgressBar1.Value = 0
         ProgressBar2.Value = 0
     End Sub
@@ -87,7 +87,7 @@ Public Class Form1
                     End If
                 Next
                 Label4.Text = "Status: Login failed."
-                Button2.Enabled = True
+                Panel1.Enabled = True
                 state = 0
             Case 3
                 Dim doc As HtmlDocument = WebBrowser1.Document
@@ -119,7 +119,7 @@ Public Class Form1
                 If prob = 2500 Then
                     Label4.Text = "Status: Done!"
                     ProgressBar1.Value = 100
-                    Button2.Enabled = True
+                    Panel1.Enabled = True
                     Exit Sub
                 End If
                 hashlist.Clear()
@@ -130,6 +130,7 @@ Public Class Form1
             Case 5
                 Label4.Text = "Status: Retrieving Problem " + Trim(prob) + " " + Trim(done) + "/" + Trim(tried)
                 ProgressBar1.Value = 100.0 * done / tried
+                ProgressBar2.Value = 0
                 Dim doc As HtmlDocument = WebBrowser1.Document
                 tdoc = doc
                 Dim th As New System.Threading.Thread(AddressOf work)
@@ -258,4 +259,5 @@ Public Class Form1
                "{time}: Submission time (HHmmss)." + vbCrLf + _
                "{fmt}: File type.")
     End Sub
+
 End Class
