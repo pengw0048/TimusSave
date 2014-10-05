@@ -15,6 +15,7 @@ Public Class Form1
     Dim hashlist As New List(Of String)
     Dim subs(1000) As Submission, subc As Integer
     Dim postdata As Byte()
+    Dim tdoc As HtmlDocument
 
     Private Function GenerateHash(ByVal SourceText As String) As String
         'Create an encoding object to ensure the encoding standard for the source text
@@ -131,72 +132,9 @@ Public Class Form1
                 WebBrowser1.Navigate("http://acm.timus.ru/status.aspx?space=1&num=" + Trim(prob) + "&author=" + JudgeID + "&refresh=0&count=1000")
             Case 5
                 Dim doc As HtmlDocument = WebBrowser1.Document
-                Dim els As HtmlElementCollection = doc.GetElementsByTagName("tr")
-                For Each el As HtmlElement In els
-                    If el.GetAttribute("className") = "even" Or el.GetAttribute("className") = "odd" Then
-                        For Each ch As HtmlElement In el.Children
-                            Select Case ch.GetAttribute("className")
-                                Case "id"
-                                    subs(subc).ID = ch.FirstChild.InnerText
-                                    subs(subc).Link = ch.FirstChild.GetAttribute("href")
-                                Case "date"
-                                    subs(subc).Dat = ch.Children(0).InnerText + " " + ch.Children(2).InnerText
-                                Case "language"
-                                    subs(subc).Language = ch.InnerText
-                                Case "test"
-                                    subs(subc).Test = IIf(IsNumeric(ch.InnerText), ch.InnerText, "")
-                                Case Else
-                                    If ch.GetAttribute("className").StartsWith("verdict") Then
-                                        subs(subc).Result = ch.InnerText
-                                    End If
-                            End Select
-                        Next
-                        subc += 1
-                    End If
-                Next
-                Dim bpath As String = pth + Trim(prob)
-                Try
-                    My.Computer.FileSystem.DeleteDirectory(bpath, FileIO.DeleteDirectoryOption.DeleteAllContents)
-                Catch ex As Exception
-
-                End Try
-                My.Computer.FileSystem.CreateDirectory(bpath)
-                Dim req As Net.HttpWebRequest = Nothing
-                For i = 0 To subc - 1
-                    ProgressBar2.Value = 100.0 * i / subc
-                    req = Net.HttpWebRequest.Create(subs(i).Link)
-                    req.Method = "GET"
-                    Dim cookies As New Net.CookieContainer
-                    req.CookieContainer = cookies
-                    req.GetResponse.Close()
-                    Application.DoEvents()
-                    req = Net.HttpWebRequest.Create(subs(i).Link)
-                    req.Method = "POST"
-                    req.ContentType = "application/x-www-form-urlencoded"
-                    req.ContentLength = postdata.Length
-                    req.GetRequestStream.Write(postdata, 0, postdata.Length)
-                    req.Accept = "*/*"
-                    req.Referer = subs(i).Link
-                    req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36"
-                    req.CookieContainer = cookies
-                    Dim resp As Net.HttpWebResponse = req.GetResponse()
-                    Application.DoEvents()
-                    Dim reader As New IO.StreamReader(resp.GetResponseStream())
-                    Dim ts As String = reader.ReadToEnd()
-                    reader.Close()
-                    resp.Close()
-                    Dim hash As String = GenerateHash(ts)
-                    If Not hashlist.Exists(Function(val As String) As Boolean
-                                               Return val = hash
-                                           End Function) Then
-                        hashlist.Add(hash)
-                        My.Computer.FileSystem.WriteAllText(bpath + "\" + Trim(prob) + "_" + subs(i).ID + "_" + transRes(subs(i).Result) + subs(i).Test + "_" + Format(subs(i).Dat, "yyyyMMddHHmmss") + "." + findExt(subs(i)), ts, False)
-                    End If
-                Next
-
-                prob += 1
-                state = 4
-                WebBrowser1.Navigate("about:blank")
+                tdoc = doc
+                Dim th As New System.Threading.Thread(AddressOf work)
+                th.Start()
             Case Else
 
         End Select
@@ -230,4 +168,78 @@ Public Class Form1
         Dim a() As String = Split(subm.Link, ".")
         Return a(UBound(a))
     End Function
+
+    Sub work()
+        Dim els As HtmlElementCollection = tdoc.GetElementsByTagName("tr")
+        For Each el As HtmlElement In els
+            If el.GetAttribute("className") = "even" Or el.GetAttribute("className") = "odd" Then
+                For Each ch As HtmlElement In el.Children
+                    Select Case ch.GetAttribute("className")
+                        Case "id"
+                            subs(subc).ID = ch.FirstChild.InnerText
+                            subs(subc).Link = ch.FirstChild.GetAttribute("href")
+                        Case "date"
+                            subs(subc).Dat = ch.Children(0).InnerText + " " + ch.Children(2).InnerText
+                        Case "language"
+                            subs(subc).Language = ch.InnerText
+                        Case "test"
+                            subs(subc).Test = IIf(IsNumeric(ch.InnerText), ch.InnerText, "")
+                        Case Else
+                            If ch.GetAttribute("className").StartsWith("verdict") Then
+                                subs(subc).Result = ch.InnerText
+                            End If
+                    End Select
+                Next
+                subc += 1
+            End If
+        Next
+        Dim bpath As String = pth + Trim(prob)
+        Try
+            My.Computer.FileSystem.DeleteDirectory(bpath, FileIO.DeleteDirectoryOption.DeleteAllContents)
+        Catch ex As Exception
+
+        End Try
+        My.Computer.FileSystem.CreateDirectory(bpath)
+        Dim req As Net.HttpWebRequest = Nothing
+        For i = 0 To subc - 1
+            ProgressBar2.Value = 100.0 * i / subc
+            req = Net.HttpWebRequest.Create(subs(i).Link)
+            req.Method = "GET"
+            Dim cookies As New Net.CookieContainer
+            req.CookieContainer = cookies
+            req.GetResponse.Close()
+            Application.DoEvents()
+            req = Net.HttpWebRequest.Create(subs(i).Link)
+            req.Method = "POST"
+            req.ContentType = "application/x-www-form-urlencoded"
+            req.ContentLength = postdata.Length
+            req.GetRequestStream.Write(postdata, 0, postdata.Length)
+            req.Accept = "*/*"
+            req.Referer = subs(i).Link
+            req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36"
+            req.CookieContainer = cookies
+            Dim resp As Net.HttpWebResponse = req.GetResponse()
+            Application.DoEvents()
+            Dim reader As New IO.StreamReader(resp.GetResponseStream())
+            Dim ts As String = reader.ReadToEnd()
+            reader.Close()
+            resp.Close()
+            Dim hash As String = GenerateHash(ts)
+            If Not hashlist.Exists(Function(val As String) As Boolean
+                                       Return val = hash
+                                   End Function) Then
+                hashlist.Add(hash)
+                My.Computer.FileSystem.WriteAllText(bpath + "\" + Trim(prob) + "_" + subs(i).ID + "_" + transRes(subs(i).Result) + subs(i).Test + "_" + Format(subs(i).Dat, "yyyyMMddHHmmss") + "." + findExt(subs(i)), ts, False)
+            End If
+        Next
+
+        prob += 1
+        state = 4
+        WebBrowser1.Navigate("about:blank")
+
+    End Sub
+
+    Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        CheckForIllegalCrossThreadCalls = False
+    End Sub
 End Class
