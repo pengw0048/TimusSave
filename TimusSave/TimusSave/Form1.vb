@@ -232,7 +232,7 @@ Public Class Form1
                 My.Computer.FileSystem.WriteAllText(bpath + "\" + Trim(prob) + "_" + subs(i).ID + "_" + transRes(subs(i).Result) + subs(i).Test + "_" + Format(subs(i).Dat, "yyyyMMddHHmmss") + "." + findExt(subs(i)), ts, False)
             End If
         Next
-
+        ProgressBar2.Value = 100
         prob += 1
         state = 4
         WebBrowser1.Navigate("about:blank")
