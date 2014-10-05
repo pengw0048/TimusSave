@@ -124,7 +124,6 @@ Public Class Form1
                 End If
                 Label4.Text = "Status: Retrieving Problem " + Trim(prob) + " " + Trim(done + 1) + "/" + Trim(tried)
                 ProgressBar1.Value = 100.0 * done / tried
-                ProgressBar2.Value = 0
                 hashlist.Clear()
                 subc = 0
                 state = 5
@@ -202,44 +201,61 @@ Public Class Form1
         My.Computer.FileSystem.CreateDirectory(bpath)
         Dim req As Net.HttpWebRequest = Nothing
         For i = 0 To subc - 1
-            ProgressBar2.Value = 100.0 * i / subc
-            req = Net.HttpWebRequest.Create(subs(i).Link)
-            req.Method = "GET"
-            Dim cookies As New Net.CookieContainer
-            req.CookieContainer = cookies
-            req.GetResponse.Close()
-            Application.DoEvents()
-            req = Net.HttpWebRequest.Create(subs(i).Link)
-            req.Method = "POST"
-            req.ContentType = "application/x-www-form-urlencoded"
-            req.ContentLength = postdata.Length
-            req.GetRequestStream.Write(postdata, 0, postdata.Length)
-            req.Accept = "*/*"
-            req.Referer = subs(i).Link
-            req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36"
-            req.CookieContainer = cookies
-            Dim resp As Net.HttpWebResponse = req.GetResponse()
-            Application.DoEvents()
-            Dim reader As New IO.StreamReader(resp.GetResponseStream())
-            Dim ts As String = reader.ReadToEnd()
-            reader.Close()
-            resp.Close()
-            Dim hash As String = GenerateHash(ts)
-            If Not hashlist.Exists(Function(val As String) As Boolean
-                                       Return val = hash
-                                   End Function) Then
-                hashlist.Add(hash)
-                My.Computer.FileSystem.WriteAllText(bpath + "\" + Trim(prob) + "_" + subs(i).ID + "_" + transRes(subs(i).Result) + subs(i).Test + "_" + Format(subs(i).Dat, "yyyyMMddHHmmss") + "." + findExt(subs(i)), ts, False)
+            If CheckBox2.Checked = False Or subs(i).Result = "Accepted" Then
+                req = Net.HttpWebRequest.Create(subs(i).Link)
+                req.Method = "GET"
+                Dim cookies As New Net.CookieContainer
+                req.CookieContainer = cookies
+                req.GetResponse.Close()
+                Application.DoEvents()
+                req = Net.HttpWebRequest.Create(subs(i).Link)
+                req.Method = "POST"
+                req.ContentType = "application/x-www-form-urlencoded"
+                req.ContentLength = postdata.Length
+                req.GetRequestStream.Write(postdata, 0, postdata.Length)
+                req.Accept = "*/*"
+                req.Referer = subs(i).Link
+                req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36"
+                req.CookieContainer = cookies
+                Dim resp As Net.HttpWebResponse = req.GetResponse()
+                Application.DoEvents()
+                Dim reader As New IO.StreamReader(resp.GetResponseStream())
+                Dim ts As String = reader.ReadToEnd()
+                reader.Close()
+                resp.Close()
+                Dim hash As String = GenerateHash(ts)
+                If CheckBox1.Checked = False Or Not hashlist.Exists(Function(val As String) As Boolean
+                                                                        Return val = hash
+                                                                    End Function) Then
+                    hashlist.Add(hash)
+                    Dim fname As String = TextBox4.Text
+                    fname = fname.Replace("{prob}", Trim(prob))
+                    fname = fname.Replace("{id}", subs(i).ID)
+                    fname = fname.Replace("{res}", transRes(subs(i).Result))
+                    fname = fname.Replace("{date}", Format(subs(i).Dat, "yyyyMMdd"))
+                    fname = fname.Replace("{time}", Format(subs(i).Dat, "HHmmss"))
+                    fname = fname.Replace("{fmt}", findExt(subs(i)))
+                    My.Computer.FileSystem.WriteAllText(bpath + "\" + fname, ts, False)
+                End If
             End If
+            ProgressBar2.Value = IIf(100.0 * (i + 1) / subc > 100, 100, 100.0 * (i + 1) / subc)
         Next
-        ProgressBar2.Value = 100
         prob += 1
         state = 4
         WebBrowser1.Navigate("about:blank")
-
     End Sub
 
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         CheckForIllegalCrossThreadCalls = False
+    End Sub
+
+    Private Sub Button3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button3.Click
+        MsgBox("Use these placeholders:" + vbCrLf + _
+               "{prob}: Problem number." + vbCrLf + _
+               "{id}: Submission ID." + vbCrLf + _
+               "{res}: Judge verdict." + vbCrLf + _
+               "{date}: Submission date (yyyyMMdd)" + vbCrLf + _
+               "{time}: Submission time (HHmmss)." + vbCrLf + _
+               "{fmt}: File type.")
     End Sub
 End Class

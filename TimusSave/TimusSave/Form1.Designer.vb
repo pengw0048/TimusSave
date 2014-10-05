@@ -35,6 +35,11 @@ Partial Class Form1
         Me.ProgressBar1 = New System.Windows.Forms.ProgressBar()
         Me.WebBrowser1 = New System.Windows.Forms.WebBrowser()
         Me.ProgressBar2 = New System.Windows.Forms.ProgressBar()
+        Me.CheckBox1 = New System.Windows.Forms.CheckBox()
+        Me.CheckBox2 = New System.Windows.Forms.CheckBox()
+        Me.Label5 = New System.Windows.Forms.Label()
+        Me.TextBox4 = New System.Windows.Forms.TextBox()
+        Me.Button3 = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'Label1
@@ -70,7 +75,6 @@ Partial Class Form1
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(252, 21)
         Me.TextBox1.TabIndex = 1
-        Me.TextBox1.Text = "81984HL"
         '
         'TextBox2
         '
@@ -78,7 +82,6 @@ Partial Class Form1
         Me.TextBox2.Name = "TextBox2"
         Me.TextBox2.Size = New System.Drawing.Size(252, 21)
         Me.TextBox2.TabIndex = 2
-        Me.TextBox2.Text = "123456"
         '
         'TextBox3
         '
@@ -98,7 +101,7 @@ Partial Class Form1
         '
         'Button2
         '
-        Me.Button2.Location = New System.Drawing.Point(14, 81)
+        Me.Button2.Location = New System.Drawing.Point(14, 137)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(369, 21)
         Me.Button2.TabIndex = 5
@@ -108,7 +111,7 @@ Partial Class Form1
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(12, 115)
+        Me.Label4.Location = New System.Drawing.Point(12, 167)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(77, 12)
         Me.Label4.TabIndex = 4
@@ -116,7 +119,7 @@ Partial Class Form1
         '
         'ProgressBar1
         '
-        Me.ProgressBar1.Location = New System.Drawing.Point(12, 139)
+        Me.ProgressBar1.Location = New System.Drawing.Point(12, 195)
         Me.ProgressBar1.Name = "ProgressBar1"
         Me.ProgressBar1.Size = New System.Drawing.Size(369, 20)
         Me.ProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous
@@ -135,17 +138,72 @@ Partial Class Form1
         '
         'ProgressBar2
         '
-        Me.ProgressBar2.Location = New System.Drawing.Point(12, 165)
+        Me.ProgressBar2.Location = New System.Drawing.Point(12, 221)
         Me.ProgressBar2.Name = "ProgressBar2"
         Me.ProgressBar2.Size = New System.Drawing.Size(369, 20)
         Me.ProgressBar2.Style = System.Windows.Forms.ProgressBarStyle.Continuous
         Me.ProgressBar2.TabIndex = 5
         '
+        'CheckBox1
+        '
+        Me.CheckBox1.AutoSize = True
+        Me.CheckBox1.Checked = True
+        Me.CheckBox1.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.CheckBox1.Location = New System.Drawing.Point(14, 82)
+        Me.CheckBox1.Name = "CheckBox1"
+        Me.CheckBox1.Size = New System.Drawing.Size(198, 16)
+        Me.CheckBox1.TabIndex = 7
+        Me.CheckBox1.Text = "Remove duplicated submissions"
+        Me.CheckBox1.UseVisualStyleBackColor = True
+        '
+        'CheckBox2
+        '
+        Me.CheckBox2.AutoSize = True
+        Me.CheckBox2.Checked = True
+        Me.CheckBox2.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.CheckBox2.Location = New System.Drawing.Point(218, 82)
+        Me.CheckBox2.Name = "CheckBox2"
+        Me.CheckBox2.Size = New System.Drawing.Size(138, 16)
+        Me.CheckBox2.TabIndex = 8
+        Me.CheckBox2.Text = "AC submissions only"
+        Me.CheckBox2.UseVisualStyleBackColor = True
+        '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Location = New System.Drawing.Point(12, 112)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(113, 12)
+        Me.Label5.TabIndex = 9
+        Me.Label5.Text = "File name pattern:"
+        '
+        'TextBox4
+        '
+        Me.TextBox4.Location = New System.Drawing.Point(128, 109)
+        Me.TextBox4.Name = "TextBox4"
+        Me.TextBox4.Size = New System.Drawing.Size(228, 21)
+        Me.TextBox4.TabIndex = 10
+        Me.TextBox4.Text = "{prob}_{id}_{res}_{date}{time}.{fmt}"
+        '
+        'Button3
+        '
+        Me.Button3.Location = New System.Drawing.Point(363, 109)
+        Me.Button3.Name = "Button3"
+        Me.Button3.Size = New System.Drawing.Size(21, 21)
+        Me.Button3.TabIndex = 11
+        Me.Button3.Text = "?"
+        Me.Button3.UseVisualStyleBackColor = True
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(396, 201)
+        Me.ClientSize = New System.Drawing.Size(396, 254)
+        Me.Controls.Add(Me.Button3)
+        Me.Controls.Add(Me.TextBox4)
+        Me.Controls.Add(Me.Label5)
+        Me.Controls.Add(Me.CheckBox2)
+        Me.Controls.Add(Me.CheckBox1)
         Me.Controls.Add(Me.WebBrowser1)
         Me.Controls.Add(Me.ProgressBar2)
         Me.Controls.Add(Me.ProgressBar1)
@@ -179,5 +237,10 @@ Partial Class Form1
     Friend WithEvents ProgressBar1 As System.Windows.Forms.ProgressBar
     Friend WithEvents WebBrowser1 As System.Windows.Forms.WebBrowser
     Friend WithEvents ProgressBar2 As System.Windows.Forms.ProgressBar
+    Friend WithEvents CheckBox1 As System.Windows.Forms.CheckBox
+    Friend WithEvents CheckBox2 As System.Windows.Forms.CheckBox
+    Friend WithEvents Label5 As System.Windows.Forms.Label
+    Friend WithEvents TextBox4 As System.Windows.Forms.TextBox
+    Friend WithEvents Button3 As System.Windows.Forms.Button
 
 End Class
