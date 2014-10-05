@@ -1,8 +1,33 @@
-﻿Public Class Form1
+﻿Imports System.Security.Cryptography
+Imports System.Text
 
-    Dim state As Integer
+Public Class Form1
+
+    Structure Submission
+        Dim ID As String, Dat As Date, Language As String, Result As String, Test As String, Link As String
+    End Structure
+
+    Dim state As Integer, prob As Integer
     Dim JudgeID As String
     Dim pth As String
+    Dim status(2500) As Integer
+    Dim tried As Integer, total As Integer, done As Integer
+    Dim hashlist As New List(Of String)
+    Dim subs(1000) As Submission, subc As Integer
+    Dim postdata As Byte()
+
+    Private Function GenerateHash(ByVal SourceText As String) As String
+        'Create an encoding object to ensure the encoding standard for the source text
+        Dim Ue As New UnicodeEncoding()
+        'Retrieve a byte array based on the source text
+        Dim ByteSourceText() As Byte = Ue.GetBytes(SourceText)
+        'Instantiate an MD5 Provider object
+        Dim Md5 As New MD5CryptoServiceProvider()
+        'Compute the hash value from the source
+        Dim ByteHash() As Byte = Md5.ComputeHash(ByteSourceText)
+        'And convert it to String format for return
+        Return Convert.ToBase64String(ByteHash)
+    End Function
 
     Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
         FolderBrowserDialog1.ShowDialog()
@@ -24,6 +49,8 @@
         Label4.Text = "Status: verifying credentials..."
         WebBrowser1.Navigate("http://acm.timus.ru/authedit.aspx")
         Button2.Enabled = False
+        ProgressBar1.Value = 0
+        ProgressBar2.Value = 0
     End Sub
 
     Private Sub WebBrowser1_DocumentCompleted(ByVal sender As Object, ByVal e As System.Windows.Forms.WebBrowserDocumentCompletedEventArgs) Handles WebBrowser1.DocumentCompleted
@@ -46,8 +73,14 @@
                 For Each el As HtmlElement In els
                     If el.GetAttribute("value") = "Save" Then
                         state = 3
-                        Label4.Text = "Status: Getting all submissions..."
+                        Label4.Text = "Status: Getting problems state..."
                         JudgeID = Trim(Val(TextBox1.Text))
+                        postdata = Encoding.Default.GetBytes("Action=getsubmit&JudgeID=" + TextBox1.Text + "&Password=" + TextBox2.Text)
+                        For i = 1000 To 2500
+                            status(i) = 1
+                        Next
+                        tried = 0
+                        total = 0
                         WebBrowser1.Navigate("http://acm.timus.ru/author.aspx?id=" + JudgeID)
                         Exit Select
                     End If
@@ -56,10 +89,145 @@
                 Button2.Enabled = True
                 state = 0
             Case 3
-                MsgBox(":)")
+                Dim doc As HtmlDocument = WebBrowser1.Document
+                Dim els As HtmlElementCollection = doc.GetElementsByTagName("td")
+                For Each el As HtmlElement In els
+                    If el.GetAttribute("className") = "accepted" Then
+                        Dim num As Integer = Val(el.FirstChild.InnerText)
+                        status(num) = 2
+                        tried += 1
+                        total += 1
+                    ElseIf el.GetAttribute("className") = "tried" Then
+                        Dim num As Integer = Val(el.FirstChild.InnerText)
+                        status(num) = 3
+                        tried += 1
+                        total += 1
+                    ElseIf el.GetAttribute("className") = "empty" Then
+                        total += 1
+                    End If
+                Next
+                state = 4
+                done = 0
+                prob = 1000
+                WebBrowser1.Navigate("about:blank")
+            Case 4
+                Do While prob < 2500
+                    If status(prob) > 1 Then Exit Do
+                    prob += 1
+                Loop
+                If prob = 2500 Then
+                    Label4.Text = "Status: Done!"
+                    ProgressBar1.Value = 100
+                    Button2.Enabled = True
+                    Exit Sub
+                End If
+                Label4.Text = "Status: Retrieving Problem " + Trim(prob) + " " + Trim(done + 1) + "/" + Trim(tried)
+                ProgressBar1.Value = 100.0 * done / tried
+                ProgressBar2.Value = 0
+                hashlist.Clear()
+                subc = 0
+                state = 5
+                done += 1
+                WebBrowser1.Navigate("http://acm.timus.ru/status.aspx?space=1&num=" + Trim(prob) + "&author=" + JudgeID + "&refresh=0&count=1000")
+            Case 5
+                Dim doc As HtmlDocument = WebBrowser1.Document
+                Dim els As HtmlElementCollection = doc.GetElementsByTagName("tr")
+                For Each el As HtmlElement In els
+                    If el.GetAttribute("className") = "even" Or el.GetAttribute("className") = "odd" Then
+                        For Each ch As HtmlElement In el.Children
+                            Select Case ch.GetAttribute("className")
+                                Case "id"
+                                    subs(subc).ID = ch.FirstChild.InnerText
+                                    subs(subc).Link = ch.FirstChild.GetAttribute("href")
+                                Case "date"
+                                    subs(subc).Dat = ch.Children(0).InnerText + " " + ch.Children(2).InnerText
+                                Case "language"
+                                    subs(subc).Language = ch.InnerText
+                                Case "test"
+                                    subs(subc).Test = IIf(IsNumeric(ch.InnerText), ch.InnerText, "")
+                                Case Else
+                                    If ch.GetAttribute("className").StartsWith("verdict") Then
+                                        subs(subc).Result = ch.InnerText
+                                    End If
+                            End Select
+                        Next
+                        subc += 1
+                    End If
+                Next
+                Dim bpath As String = pth + Trim(prob)
+                Try
+                    My.Computer.FileSystem.DeleteDirectory(bpath, FileIO.DeleteDirectoryOption.DeleteAllContents)
+                Catch ex As Exception
+
+                End Try
+                My.Computer.FileSystem.CreateDirectory(bpath)
+                Dim req As Net.HttpWebRequest = Nothing
+                For i = 0 To subc - 1
+                    ProgressBar2.Value = 100.0 * i / subc
+                    req = Net.HttpWebRequest.Create(subs(i).Link)
+                    req.Method = "GET"
+                    Dim cookies As New Net.CookieContainer
+                    req.CookieContainer = cookies
+                    req.GetResponse.Close()
+                    Application.DoEvents()
+                    req = Net.HttpWebRequest.Create(subs(i).Link)
+                    req.Method = "POST"
+                    req.ContentType = "application/x-www-form-urlencoded"
+                    req.ContentLength = postdata.Length
+                    req.GetRequestStream.Write(postdata, 0, postdata.Length)
+                    req.Accept = "*/*"
+                    req.Referer = subs(i).Link
+                    req.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36"
+                    req.CookieContainer = cookies
+                    Dim resp As Net.HttpWebResponse = req.GetResponse()
+                    Application.DoEvents()
+                    Dim reader As New IO.StreamReader(resp.GetResponseStream())
+                    Dim ts As String = reader.ReadToEnd()
+                    reader.Close()
+                    resp.Close()
+                    Dim hash As String = GenerateHash(ts)
+                    If Not hashlist.Exists(Function(val As String) As Boolean
+                                               Return val = hash
+                                           End Function) Then
+                        hashlist.Add(hash)
+                        My.Computer.FileSystem.WriteAllText(bpath + "\" + Trim(prob) + "_" + subs(i).ID + "_" + transRes(subs(i).Result) + subs(i).Test + "_" + Format(subs(i).Dat, "yyyyMMddHHmmss") + "." + findExt(subs(i)), ts, False)
+                    End If
+                Next
+
+                prob += 1
+                state = 4
+                WebBrowser1.Navigate("about:blank")
             Case Else
 
         End Select
 
     End Sub
+
+    Function transRes(ByVal result As String) As String
+        Select Case result.Substring(0, 3)
+            Case "Com"
+                Return "CE"
+            Case "Wro"
+                Return "WA"
+            Case "Acc"
+                Return "AC"
+            Case "Tim"
+                Return "TL"
+            Case "Mem"
+                Return "ML"
+            Case "Run"
+                Return "RE"
+            Case "Out"
+                Return "OL"
+            Case "Res"
+                Return "RF"
+            Case Else
+                Return result
+        End Select
+    End Function
+
+    Function findExt(ByRef subm As Submission) As String
+        Dim a() As String = Split(subm.Link, ".")
+        Return a(UBound(a))
+    End Function
 End Class

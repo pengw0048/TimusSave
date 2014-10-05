@@ -33,8 +33,8 @@ Partial Class Form1
         Me.Button2 = New System.Windows.Forms.Button()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.ProgressBar1 = New System.Windows.Forms.ProgressBar()
-        Me.ProgressBar2 = New System.Windows.Forms.ProgressBar()
         Me.WebBrowser1 = New System.Windows.Forms.WebBrowser()
+        Me.ProgressBar2 = New System.Windows.Forms.ProgressBar()
         Me.SuspendLayout()
         '
         'Label1
@@ -70,6 +70,7 @@ Partial Class Form1
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(252, 21)
         Me.TextBox1.TabIndex = 1
+        Me.TextBox1.Text = "81984HL"
         '
         'TextBox2
         '
@@ -77,6 +78,7 @@ Partial Class Form1
         Me.TextBox2.Name = "TextBox2"
         Me.TextBox2.Size = New System.Drawing.Size(252, 21)
         Me.TextBox2.TabIndex = 2
+        Me.TextBox2.Text = "123456"
         '
         'TextBox3
         '
@@ -120,6 +122,16 @@ Partial Class Form1
         Me.ProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous
         Me.ProgressBar1.TabIndex = 5
         '
+        'WebBrowser1
+        '
+        Me.WebBrowser1.Location = New System.Drawing.Point(14, 191)
+        Me.WebBrowser1.MinimumSize = New System.Drawing.Size(20, 20)
+        Me.WebBrowser1.Name = "WebBrowser1"
+        Me.WebBrowser1.Size = New System.Drawing.Size(658, 441)
+        Me.WebBrowser1.TabIndex = 6
+        Me.WebBrowser1.TabStop = False
+        Me.WebBrowser1.WebBrowserShortcutsEnabled = False
+        '
         'ProgressBar2
         '
         Me.ProgressBar2.Location = New System.Drawing.Point(12, 165)
@@ -128,22 +140,11 @@ Partial Class Form1
         Me.ProgressBar2.Style = System.Windows.Forms.ProgressBarStyle.Continuous
         Me.ProgressBar2.TabIndex = 5
         '
-        'WebBrowser1
-        '
-        Me.WebBrowser1.Location = New System.Drawing.Point(383, 192)
-        Me.WebBrowser1.MinimumSize = New System.Drawing.Size(20, 20)
-        Me.WebBrowser1.Name = "WebBrowser1"
-        Me.WebBrowser1.Size = New System.Drawing.Size(250, 250)
-        Me.WebBrowser1.TabIndex = 6
-        Me.WebBrowser1.TabStop = False
-        Me.WebBrowser1.Visible = False
-        Me.WebBrowser1.WebBrowserShortcutsEnabled = False
-        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(395, 202)
+        Me.ClientSize = New System.Drawing.Size(814, 668)
         Me.Controls.Add(Me.WebBrowser1)
         Me.Controls.Add(Me.ProgressBar2)
         Me.Controls.Add(Me.ProgressBar1)
@@ -175,7 +176,7 @@ Partial Class Form1
     Friend WithEvents Button2 As System.Windows.Forms.Button
     Friend WithEvents Label4 As System.Windows.Forms.Label
     Friend WithEvents ProgressBar1 As System.Windows.Forms.ProgressBar
-    Friend WithEvents ProgressBar2 As System.Windows.Forms.ProgressBar
     Friend WithEvents WebBrowser1 As System.Windows.Forms.WebBrowser
+    Friend WithEvents ProgressBar2 As System.Windows.Forms.ProgressBar
 
 End Class
