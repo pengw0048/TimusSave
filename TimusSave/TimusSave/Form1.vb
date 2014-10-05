@@ -47,7 +47,7 @@ Public Class Form1
         pth = TextBox3.Text
         If Strings.Right(pth, 1) <> "\" Then pth += "\"
         state = 1
-        Label4.Text = "Status: verifying credentials..."
+        Label4.Text = "Status: Verifying credentials..."
         WebBrowser1.Navigate("http://acm.timus.ru/authedit.aspx")
         Button2.Enabled = False
         ProgressBar1.Value = 0
@@ -122,14 +122,14 @@ Public Class Form1
                     Button2.Enabled = True
                     Exit Sub
                 End If
-                Label4.Text = "Status: Retrieving Problem " + Trim(prob) + " " + Trim(done + 1) + "/" + Trim(tried)
-                ProgressBar1.Value = 100.0 * done / tried
                 hashlist.Clear()
                 subc = 0
                 state = 5
                 done += 1
                 WebBrowser1.Navigate("http://acm.timus.ru/status.aspx?space=1&num=" + Trim(prob) + "&author=" + JudgeID + "&refresh=0&count=1000")
             Case 5
+                Label4.Text = "Status: Retrieving Problem " + Trim(prob) + " " + Trim(done) + "/" + Trim(tried)
+                ProgressBar1.Value = 100.0 * done / tried
                 Dim doc As HtmlDocument = WebBrowser1.Document
                 tdoc = doc
                 Dim th As New System.Threading.Thread(AddressOf work)
